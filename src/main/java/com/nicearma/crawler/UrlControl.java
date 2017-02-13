@@ -1,6 +1,7 @@
 package com.nicearma.crawler;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -32,17 +33,23 @@ public class UrlControl extends AbstractVerticle {
     public void start() throws Exception {
 
         vertx.setPeriodic(5000, id -> {
+
             // This handler will get called every second
-            urlScanneds.forEach(logger::info);
+            //urlScanneds.forEach(logger::info);
 
         });
 
 
 
         vertx.eventBus().consumer("scan.toScan").handler(m -> {
+
+
             String urlToScan = String.valueOf(m.body());
 
             if (StringUtils.isNotBlank(configuration.getUrlFilter())&& !configuration.equals(urlToScan)) {
+                return;
+            }
+            if(urlToScan.contains("?share=")){
                 return;
             }
 
@@ -52,7 +59,11 @@ public class UrlControl extends AbstractVerticle {
                 return;
             }else{
                 urlScanneds.add(urlToScan);
-                vertx.eventBus().send("scan.url", urlToScan);
+                vertx.eventBus().send("scan.url", urlToScan,(result)->{
+                   if(result.failed()){
+                       logger.info("fail:"+urlToScan, result.cause());
+                   }
+                });
             }
 
 

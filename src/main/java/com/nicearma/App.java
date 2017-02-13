@@ -1,7 +1,7 @@
 package com.nicearma;
 
 import com.nicearma.crawler.UrlControl;
-import com.nicearma.crawler.WebCrawler;
+import com.nicearma.crawler.WebCrawlerJs;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
@@ -20,13 +20,16 @@ public class App {
 
         DeploymentOptions optionWorker = new DeploymentOptions();
         optionWorker.setWorker(true);
-        optionWorker.setWorkerPoolSize(8);
 
         vertx.deployVerticle(weldVerticle, result -> {
             if (result.succeeded()) {
                 // Deploy Verticle instance produced by Weld
                 vertx.deployVerticle(weldVerticle.container().select(UrlControl.class).get());
-                vertx.deployVerticle(weldVerticle.container().select(WebCrawler.class).get(), optionWorker);
+
+                vertx.deployVerticle(weldVerticle.container().select(WebCrawlerJs.class).get(), optionWorker);
+                vertx.deployVerticle(weldVerticle.container().select(WebCrawlerJs.class).get(), optionWorker);
+                vertx.deployVerticle(weldVerticle.container().select(WebCrawlerJs.class).get(), optionWorker);
+                vertx.deployVerticle(weldVerticle.container().select(WebCrawlerJs.class).get(), optionWorker);
 
                 Router router = Router.router(vertx);
                 router.route().handler(BodyHandler.create());

@@ -3,32 +3,38 @@ package com.nicearma.crawler;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
+import com.nicearma.db.DBConnectorService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import lombok.extern.java.Log;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import java.util.List;
 
 @Dependent
-public class WebCrawler extends AbstractVerticle {
+public class WebCrawlerJs extends AbstractVerticle {
 
-    JBrowserDriver driver;
-    Logger logger = LoggerFactory.getLogger(WebCrawler.class);
+
+    Logger logger = LoggerFactory.getLogger(WebCrawlerJs.class);
+
+    @Inject
+    DBConnectorService dBConnectorService;
+
 
     @Override
     public void start() throws Exception {
 
         vertx.eventBus().consumer("scan.url").handler(m -> {
 
-            driver = new JBrowserDriver(Settings.builder().
+            JBrowserDriver driver = new JBrowserDriver(Settings.builder().
                     timezone(Timezone.AMERICA_NEWYORK).build());
 
 
             String url = String.valueOf(m.body());
+            //logger.info("scanned:"+url);
 
             // This will block for the page load and any
             // associated AJAX requests

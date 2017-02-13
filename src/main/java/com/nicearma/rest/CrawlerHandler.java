@@ -1,7 +1,7 @@
 package com.nicearma.rest;
 
 
-import com.nicearma.crawler.WebCrawler;
+import com.nicearma.crawler.WebCrawlerJs;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.RoutingContext;
@@ -11,19 +11,15 @@ import org.jboss.weld.vertx.web.WebRoute;
 import javax.inject.Inject;
 
 @WebRoute("/hello")
-public class HelloHandlre implements Handler<RoutingContext> {
+public class CrawlerHandler implements Handler<RoutingContext> {
 
     @Inject
-    WebCrawler webCrawler;
+    WebCrawlerJs webCrawler;
 
     @Inject
     Vertx vertx;
 
-
-
-
-
-    @ActivateRequestContext // -> this interceptor binding may be used to activate the CDI request context within a handle() invocation
+    @ActivateRequestContext
     @Override
     public void handle(RoutingContext ctx) {
         vertx.eventBus().send("scan.toScan", "https://www.nicearma.com");
