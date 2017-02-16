@@ -13,7 +13,7 @@ public class DBConnectorService {
     public DBConnectorService(){
 
         jdbc= JDBCClient.createShared(Vertx.vertx(), new JsonObject()
-                .put("url", "jdbc:h2:mem:crawler")
+                .put("url", "jdbc:h2:crawler-db")
                 .put("driver_class", "org.h2.Driver"));
     }
 

@@ -3,16 +3,16 @@ package com.nicearma.crawler;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
-import com.nicearma.db.DBConnectorService;
+import com.nicearma.db.DBService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Dependent
 public class WebCrawlerJs extends AbstractVerticle {
@@ -21,7 +21,7 @@ public class WebCrawlerJs extends AbstractVerticle {
     Logger logger = LoggerFactory.getLogger(WebCrawlerJs.class);
 
     @Inject
-    DBConnectorService dBConnectorService;
+    DBService dBService;
 
 
     @Override
@@ -32,32 +32,21 @@ public class WebCrawlerJs extends AbstractVerticle {
             JBrowserDriver driver = new JBrowserDriver(Settings.builder().
                     timezone(Timezone.AMERICA_NEWYORK).build());
 
-
             String url = String.valueOf(m.body());
-            //logger.info("scanned:"+url);
 
-            // This will block for the page load and any
-            // associated AJAX requests
             driver.get(url);
 
-            // You can get status code unlike other Selenium drivers.
-            // It blocks for AJAX requests and page loads after clicks
-            // and keyboard events.
-            System.out.println(driver.getStatusCode());
-
-            List<WebElement> links = driver.findElements(By.tagName("a"));
-
-            links.forEach(link -> scan(link.getAttribute("href")));
-
-
+            List<String> links = driver.findElements(By.tagName("a")).stream().map(a -> a.getAttribute("href")).collect(Collectors.toList());
 
             driver.quit();
 
-        });
-    }
+            links.forEach((l)->{
+                logger.info(l);
+            });
 
-    public void scan(String url){
-        vertx.eventBus().send("scan.toScan", url);
+            dBService.insertUrl(links);
+
+        });
     }
 
 
