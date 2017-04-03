@@ -6,7 +6,9 @@ import com.nicearma.crawler.verticle.WebCrawlerJs;
 import com.nicearma.db.DBService;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.weld.context.activator.ActivateRequestContext;
 import org.jboss.weld.vertx.web.WebRoute;
 
@@ -14,7 +16,7 @@ import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 
-@WebRoute("/hello")
+@WebRoute(value = "/crawler", methods = HttpMethod.GET)
 public class CrawlerHandler implements Handler<RoutingContext> {
 
     @Inject
@@ -35,9 +37,18 @@ public class CrawlerHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext ctx) {
 
+        String url = ctx.request().getParam("url");
+        String domain = ctx.request().getParam("domain");
+
+        if (StringUtils.isEmpty(url) || StringUtils.isEmpty(domain)) {
+            ctx.response().setStatusCode(400).end();
+            return;
+        }
+
         CrawlerConfiguration crawlerConfiguration = new CrawlerConfiguration();
-        crawlerConfiguration.setUrl("http://localhost:8080/");
-        crawlerConfiguration.setDomainFilter("localhost");
+
+        crawlerConfiguration.setUrl(url);
+        crawlerConfiguration.setDomainFilter(domain);
         crawlerConfiguration.setShareButtonFilter("share=");
 
         dbService.insertCrawler(crawlerConfiguration).setHandler(result -> {
