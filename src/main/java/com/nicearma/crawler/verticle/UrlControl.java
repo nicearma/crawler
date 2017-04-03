@@ -15,7 +15,9 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.util.regex.Pattern;
 
-
+/**
+ * Control witch url have to be scanned, ignored
+ */
 @Dependent
 public class UrlControl extends AbstractVerticle {
 
@@ -25,22 +27,30 @@ public class UrlControl extends AbstractVerticle {
     @Inject
     DBService dbService;
 
-
+    /**
+     * Have one consumer for StringConstants.SCAN_TO_SCAN, this will try to determinate if the given url can be scanned or not
+     * @throws Exception
+     */
     @Override
     public void start() throws Exception {
 
+        //listen message from SCAN_TO_SCAN
         vertx.eventBus().<JsonObject>consumer(StringConstants.SCAN_TO_SCAN).handler(m -> {
+            //get the href and the crawlerUrl
             JsonObject jsonObject = m.body();
 
             //TODO:add some cache
-            dbService.readCrawlerFromUrl(jsonObject.getString(StringConstants.JSON_CRAWLER_URL)).setHandler(resultReadCrawlerFromUrl -> {
+            //get information from the database about the JSON_CRAWLER_URL
+            dbService.readCrawlerConfigurationFromUrl(jsonObject.getString(StringConstants.JSON_CRAWLER_URL)).setHandler(resultReadCrawlerFromUrl -> {
+
                 if (resultReadCrawlerFromUrl.succeeded()) {
+                    //transform the result to CrawlerConfiguration
                     CrawlerConfiguration crawlerConfiguration = new CrawlerConfiguration(resultReadCrawlerFromUrl.result().getRows().get(0));
 
+                    //filter by the domain
                     if (crawlerConfiguration.isFilterDomain() && StringUtils.isNotBlank(crawlerConfiguration.getDomainFilter())) {
 
                         Pattern inDomain = Regex.getPatternDomain(crawlerConfiguration.getDomainFilter());
-
 
                         if (!inDomain.matcher(jsonObject.getString(StringConstants.JSON_HREF)).matches()) {
 
@@ -51,6 +61,7 @@ public class UrlControl extends AbstractVerticle {
                         }
                     }
 
+                    //filter by shared button
                     if (crawlerConfiguration.isFilterShareButton() && StringUtils.isNotBlank(crawlerConfiguration.getShareButtonFilter()) && jsonObject.getString(StringConstants.JSON_HREF).contains(crawlerConfiguration.getShareButtonFilter())) {
                         logger.info("Ignored share button :" + jsonObject.getString(StringConstants.JSON_HREF));
                         dbService.updateUrlScannedStatus(CrawlerStatus.INGORED, crawlerConfiguration.getUrl());

@@ -15,7 +15,6 @@ public class StringConstants {
     public static final String JSON_FILTER_SHARE_BUTTON = "FILTER_SHARE_BUTTON";
     public static final String JSON_SHARE_BUTTON_FILTER = "SHARE_BUTTON_FILTER";
     public static final String JSON_DEEP = "DEEP";
-
     
     public static final String SCAN = "scan";
     public static final String SCAN_TO_SCAN = SCAN + ".toScan";

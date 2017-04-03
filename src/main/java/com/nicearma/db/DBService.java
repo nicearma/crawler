@@ -24,7 +24,7 @@ public class DBService {
     private static JDBCClient jdbc;
 
     /**
-     * TODO:
+     * The first time we ask information about the url, we save all the useful information about it (filter...)
      *
      * @param crawlerConfiguration
      * @return
@@ -46,7 +46,7 @@ public class DBService {
     }
 
     /**
-     * TODO:
+     * Save the list of every link founded (href)
      *
      * @param hrefs
      * @param url
@@ -74,7 +74,7 @@ public class DBService {
     }
 
     /**
-     * TODO:
+     * Save the list of every image founded (src and href with filter)
      *
      * @param srcs
      * @return
@@ -100,7 +100,7 @@ public class DBService {
     }
 
     /**
-     * TODO:
+     * Save the relation between the image and where was found
      *
      * @param srcs
      * @param href
@@ -126,10 +126,12 @@ public class DBService {
     }
 
     /**
+     * Find link given status
+     *
      * @param status
      * @return
      */
-    public Future<ResultSet> readLinkWithScannedStatus(CrawlerStatus status) {
+    public Future<ResultSet> findLinkWithScannedStatus(CrawlerStatus status) {
 
         Future<ResultSet> response = Future.future();
 
@@ -152,10 +154,12 @@ public class DBService {
     }
 
     /**
+     * Read CrawlerConfiguration give the CrawlerUrl
+     *
      * @param url
      * @return
      */
-    public Future<ResultSet> readCrawlerFromUrl(String url) {
+    public Future<ResultSet> readCrawlerConfigurationFromUrl(String url) {
 
         Future<ResultSet> response = Future.future();
 
@@ -177,11 +181,13 @@ public class DBService {
     }
 
     /**
+     * Update the scanned statuf for the link
+     *
      * @param status
-     * @param url
+     * @param link
      * @return
      */
-    public Future<ResultSet> updateUrlScannedStatus(CrawlerStatus status, String url) {
+    public Future<ResultSet> updateUrlScannedStatus(CrawlerStatus status, String link) {
 
         Future<ResultSet> response = Future.future();
 
@@ -189,7 +195,7 @@ public class DBService {
             if (connection.succeeded()) {
                 JsonArray requestJson = new JsonArray()
                         .add(status.getValue())
-                        .add(url);
+                        .add(link);
 
                 connection.result().updateWithParams(DBSql.UPDATE_LINK_SCANNED_URL.getSql(), requestJson, (result) -> {
                     if (result.succeeded()) {
@@ -205,6 +211,8 @@ public class DBService {
     }
 
     /**
+     * Add limit to the SQL expression (if is used)
+     *
      * @param requestJson
      * @param limit
      * @param offset
@@ -216,6 +224,8 @@ public class DBService {
 
 
     /**
+     * Create the database
+     *
      * @return
      */
     public Future createDatabase() {
@@ -238,7 +248,8 @@ public class DBService {
     }
 
     /**
-     * TODO:
+     * Create the table image
+     *
      * @return
      */
     private Future createTableImage() {
@@ -246,7 +257,8 @@ public class DBService {
     }
 
     /**
-     * TODO:
+     * Create table crawler
+     *
      * @return
      */
     private Future createTableCrawler() {
@@ -255,6 +267,7 @@ public class DBService {
 
     /**
      * TODO
+     *
      * @return
      */
     private Future createTableLinkImage() {
@@ -262,7 +275,8 @@ public class DBService {
     }
 
     /**
-     * TODO
+     * Create the table link
+     *
      * @return
      */
     private Future createTableLink() {
@@ -270,7 +284,8 @@ public class DBService {
     }
 
     /**
-     * TODO
+     * Generic create, used at all create*
+     *
      * @param sql
      * @return
      */
@@ -288,6 +303,7 @@ public class DBService {
     }
 
     /**
+     * Create connection given the url and the drivenClass
      *
      * @param url
      * @param driverClass
